@@ -390,6 +390,71 @@ describe("HTTP game arena app", () => {
     expect((await request(singleHop).post("/api/tools/nope").set("X-Forwarded-For", "203.0.113.20").send({})).status).toBe(429);
   });
 
+  it("uses Render's overwritten CF client-IP header without enabling Express proxy trust", async () => {
+    const app = createHttpApp(new ToolService(new GameStore()), {
+      rateLimitClientIpSource: "render-cf-connecting-ip",
+      apiToolsRateLimit: { limit: 1, windowMs: 60_000 },
+    });
+    expect(app.enabled("trust proxy")).toBe(false);
+
+    const first = await request(app)
+      .post("/api/tools/nope")
+      .set("CF-Connecting-IP", "203.0.113.30")
+      .set("X-Forwarded-For", "198.51.100.10")
+      .send({});
+    expect(first.status).toBe(404);
+    const differentClient = await request(app)
+      .post("/api/tools/nope")
+      .set("CF-Connecting-IP", "203.0.113.31")
+      .set("X-Forwarded-For", "198.51.100.11")
+      .send({});
+    expect(differentClient.status).toBe(404);
+    const spoofedForwardingChain = await request(app)
+      .post("/api/tools/nope")
+      .set("CF-Connecting-IP", "203.0.113.30")
+      .set("X-Forwarded-For", "192.0.2.1, 192.0.2.2")
+      .send({});
+    expect(spoofedForwardingChain.status).toBe(429);
+  });
+
+  it("rejects ambiguous programmatic Render and Express proxy trust", () => {
+    expect(() => createHttpApp(new ToolService(new GameStore()), {
+      rateLimitClientIpSource: "render-cf-connecting-ip",
+      trustedProxyHops: 1,
+    })).toThrow(/must not be combined/);
+  });
+
+  it("shares one fail-closed bucket for missing or malformed Render client-IP headers", async () => {
+    const app = createHttpApp(new ToolService(new GameStore()), {
+      rateLimitClientIpSource: "render-cf-connecting-ip",
+      apiToolsRateLimit: { limit: 1, windowMs: 60_000 },
+    });
+    expect((await request(app).post("/api/tools/nope").send({})).status).toBe(404);
+    expect((await request(app)
+      .post("/api/tools/nope")
+      .set("CF-Connecting-IP", "2".repeat(46))
+      .send({})).status).toBe(429);
+  });
+
+  it("enforces a process-wide rate-limit backstop across distinct client buckets", async () => {
+    const app = createHttpApp(new ToolService(new GameStore()), {
+      rateLimitClientIpSource: "render-cf-connecting-ip",
+      apiToolsRateLimit: { limit: 10, windowMs: 60_000 },
+      apiToolsGlobalRateLimit: { limit: 1, windowMs: 60_000 },
+    });
+    expect((await request(app)
+      .post("/api/tools/nope")
+      .set("CF-Connecting-IP", "203.0.113.50")
+      .send({})).status).toBe(404);
+    const limited = await request(app)
+      .post("/api/tools/nope")
+      .set("CF-Connecting-IP", "203.0.113.51")
+      .send({});
+    expect(limited.status).toBe(429);
+    expect(limited.headers["x-ratelimit-limit"]).toBe("1");
+    expect(limited.headers["x-ratelimit-remaining"]).toBe("0");
+  });
+
   it("uses protocol-specific safe parse and size error envelopes", async () => {
     const app = createHttpApp(new ToolService(new GameStore()));
     const restMalformed = await request(app).post("/api/tools/get_game_state").set("Content-Type", "application/json").send("{");

@@ -60,6 +60,7 @@ describe("public app runtime configuration", () => {
       openAiAppsChallengeToken: undefined,
       trustedProxyCidrs: [],
       trustedProxyHops: undefined,
+      rateLimitClientIpSource: "express",
     });
   });
 
@@ -73,6 +74,7 @@ describe("public app runtime configuration", () => {
       openAiAppsChallengeToken: "challenge_token-123",
       trustedProxyCidrs: ["10.0.0.0/8", "2001:db8::/48"],
       trustedProxyHops: undefined,
+      rateLimitClientIpSource: "express",
     });
   });
 
@@ -110,6 +112,7 @@ describe("public app runtime configuration", () => {
       openAiAppsChallengeToken: undefined,
       trustedProxyCidrs: [],
       trustedProxyHops: undefined,
+      rateLimitClientIpSource: "express",
     });
   });
 
@@ -152,5 +155,69 @@ describe("public app runtime configuration", () => {
       TRUSTED_PROXY_CIDRS: "10.0.0.0/8",
       TRUST_PROXY_HOPS: "1",
     })).toThrow(/must not both/);
+  });
+
+  it("accepts Render's overwritten CF client-IP header only for the exact public Render service", () => {
+    expect(publicAppRuntimeOptionsFromEnvironment({
+      PUBLIC_BASE_URL: "https://turnplay-arena.onrender.com",
+      RATE_LIMIT_CLIENT_IP_SOURCE: "render-cf-connecting-ip",
+      RENDER: "true",
+      RENDER_SERVICE_TYPE: "web",
+      RENDER_EXTERNAL_URL: "https://turnplay-arena.onrender.com",
+      RENDER_EXTERNAL_HOSTNAME: "turnplay-arena.onrender.com",
+    })).toEqual({
+      widgetDomain: "https://turnplay-arena.onrender.com",
+      openAiAppsChallengeToken: undefined,
+      trustedProxyCidrs: [],
+      trustedProxyHops: undefined,
+      rateLimitClientIpSource: "render-cf-connecting-ip",
+    });
+  });
+
+  it.each([
+    [{ RATE_LIMIT_CLIENT_IP_SOURCE: "cf-connecting-ip" }, /RATE_LIMIT_CLIENT_IP_SOURCE/],
+    [{
+      PUBLIC_BASE_URL: "https://turnplay-arena.onrender.com",
+      RATE_LIMIT_CLIENT_IP_SOURCE: "render-cf-connecting-ip",
+      RENDER: "false",
+      RENDER_SERVICE_TYPE: "web",
+      RENDER_EXTERNAL_URL: "https://turnplay-arena.onrender.com",
+      RENDER_EXTERNAL_HOSTNAME: "turnplay-arena.onrender.com",
+    }, /Render web service/],
+    [{
+      PUBLIC_BASE_URL: "https://turnplay-arena.onrender.com",
+      RATE_LIMIT_CLIENT_IP_SOURCE: "render-cf-connecting-ip",
+      RENDER: "true",
+      RENDER_SERVICE_TYPE: "worker",
+      RENDER_EXTERNAL_URL: "https://turnplay-arena.onrender.com",
+      RENDER_EXTERNAL_HOSTNAME: "turnplay-arena.onrender.com",
+    }, /Render web service/],
+    [{
+      PUBLIC_BASE_URL: "https://turnplay-arena.onrender.com",
+      RATE_LIMIT_CLIENT_IP_SOURCE: "render-cf-connecting-ip",
+      RENDER: "true",
+      RENDER_SERVICE_TYPE: "web",
+      RENDER_EXTERNAL_URL: "https://other.onrender.com",
+      RENDER_EXTERNAL_HOSTNAME: "turnplay-arena.onrender.com",
+    }, /match RENDER_EXTERNAL_URL/],
+    [{
+      PUBLIC_BASE_URL: "https://games.example.com",
+      RATE_LIMIT_CLIENT_IP_SOURCE: "render-cf-connecting-ip",
+      RENDER: "true",
+      RENDER_SERVICE_TYPE: "web",
+      RENDER_EXTERNAL_URL: "https://games.example.com",
+      RENDER_EXTERNAL_HOSTNAME: "games.example.com",
+    }, /onrender.com hostname/],
+    [{
+      PUBLIC_BASE_URL: "https://turnplay-arena.onrender.com",
+      RATE_LIMIT_CLIENT_IP_SOURCE: "render-cf-connecting-ip",
+      TRUST_PROXY_HOPS: "1",
+      RENDER: "true",
+      RENDER_SERVICE_TYPE: "web",
+      RENDER_EXTERNAL_URL: "https://turnplay-arena.onrender.com",
+      RENDER_EXTERNAL_HOSTNAME: "turnplay-arena.onrender.com",
+    }, /must not be combined/],
+  ] as const)("rejects unsafe Render client-IP source configuration %#", (environment, message) => {
+    expect(() => publicAppRuntimeOptionsFromEnvironment(environment)).toThrow(message);
   });
 });

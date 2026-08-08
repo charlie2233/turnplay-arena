@@ -18,6 +18,7 @@ export interface PublicAppRuntimeOptions {
   openAiAppsChallengeToken?: string;
   trustedProxyCidrs: readonly string[];
   trustedProxyHops?: number;
+  rateLimitClientIpSource: "express" | "render-cf-connecting-ip";
 }
 
 export function gameStoreRuntimeOptionsFromEnvironment(
@@ -65,6 +66,13 @@ export function publicAppRuntimeOptionsFromEnvironment(
   if (trustedProxyCidrs.length > 0 && trustedProxyHops !== undefined) {
     throw new RangeError("TRUSTED_PROXY_CIDRS and TRUST_PROXY_HOPS must not both be configured.");
   }
+  const rateLimitClientIpSource = optionalRateLimitClientIpSource(
+    "RATE_LIMIT_CLIENT_IP_SOURCE",
+    environment.RATE_LIMIT_CLIENT_IP_SOURCE,
+  );
+  if (rateLimitClientIpSource === "render-cf-connecting-ip") {
+    validateRenderClientIpSource(environment, widgetDomain, trustedProxyCidrs, trustedProxyHops);
+  }
   return {
     widgetDomain,
     openAiAppsChallengeToken: optionalChallengeToken(
@@ -73,6 +81,7 @@ export function publicAppRuntimeOptionsFromEnvironment(
     ),
     trustedProxyCidrs,
     trustedProxyHops,
+    rateLimitClientIpSource,
   };
 }
 
@@ -156,4 +165,36 @@ function optionalTrustedProxyHops(name: string, value: string | undefined): numb
     throw new RangeError(`${name} must be an integer between 1 and 4.`);
   }
   return Number(value);
+}
+
+function optionalRateLimitClientIpSource(
+  name: string,
+  value: string | undefined,
+): PublicAppRuntimeOptions["rateLimitClientIpSource"] {
+  if (value === undefined) return "express";
+  if (value !== "render-cf-connecting-ip") {
+    throw new RangeError(`${name} must be render-cf-connecting-ip when configured.`);
+  }
+  return value;
+}
+
+function validateRenderClientIpSource(
+  environment: Environment,
+  widgetDomain: string | undefined,
+  trustedProxyCidrs: readonly string[],
+  trustedProxyHops: number | undefined,
+): void {
+  if (trustedProxyCidrs.length > 0 || trustedProxyHops !== undefined) {
+    throw new RangeError("RATE_LIMIT_CLIENT_IP_SOURCE must not be combined with Express proxy trust.");
+  }
+  if (environment.RENDER !== "true" || environment.RENDER_SERVICE_TYPE !== "web") {
+    throw new RangeError("render-cf-connecting-ip requires a Render web service.");
+  }
+  if (widgetDomain === undefined || environment.RENDER_EXTERNAL_URL !== widgetDomain) {
+    throw new RangeError("render-cf-connecting-ip requires PUBLIC_BASE_URL to match RENDER_EXTERNAL_URL.");
+  }
+  const hostname = new URL(widgetDomain).hostname;
+  if (hostname !== environment.RENDER_EXTERNAL_HOSTNAME || !hostname.endsWith(".onrender.com")) {
+    throw new RangeError("render-cf-connecting-ip requires the exact Render onrender.com hostname.");
+  }
 }

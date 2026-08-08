@@ -1,4 +1,5 @@
 import { createHmac, randomBytes } from "node:crypto";
+import { isIP } from "node:net";
 
 import express, { type NextFunction, type Request, type Response } from "express";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
@@ -31,10 +32,13 @@ export interface HttpAppOptions {
   openAiAppsChallengeToken?: string;
   trustedProxyCidrs?: readonly string[];
   trustedProxyHops?: number;
+  rateLimitClientIpSource?: "express" | "render-cf-connecting-ip";
   telemetry?: OperationalTelemetry;
   now?: () => number;
   apiToolsRateLimit?: RateLimitOptions;
   mcpRateLimit?: RateLimitOptions;
+  apiToolsGlobalRateLimit?: RateLimitOptions;
+  mcpGlobalRateLimit?: RateLimitOptions;
 }
 
 interface RateBucket { windowStart: number; count: number }
@@ -105,7 +109,14 @@ export function createHttpApp(service: ToolService, options: HttpAppOptions = {}
   const loadWidgetHtml = options.loadWidgetHtml ?? defaultWidgetLoader;
   const apiLimiter = new FixedWindowLimiter(options.apiToolsRateLimit ?? {}, now);
   const mcpLimiter = new FixedWindowLimiter({ limit: 120, ...options.mcpRateLimit }, now);
+  const apiGlobalLimiter = new FixedWindowLimiter({ limit: 600, maxBuckets: 1, ...options.apiToolsGlobalRateLimit }, now);
+  const mcpGlobalLimiter = new FixedWindowLimiter({ limit: 1_200, maxBuckets: 1, ...options.mcpGlobalRateLimit }, now);
   const rateLimitKeySecret = randomBytes(32).toString("hex");
+  const rateLimitClientIpSource = options.rateLimitClientIpSource ?? "express";
+  if (rateLimitClientIpSource === "render-cf-connecting-ip"
+    && (options.trustedProxyHops !== undefined || (options.trustedProxyCidrs?.length ?? 0) > 0)) {
+    throw new RangeError("Render client-IP mode must not be combined with Express proxy trust.");
+  }
 
   app.disable("x-powered-by");
   if (options.trustedProxyHops !== undefined) {
@@ -139,8 +150,20 @@ export function createHttpApp(service: ToolService, options: HttpAppOptions = {}
       next();
     });
   }
-  app.use("/api/tools", rateLimitMiddleware(apiLimiter, "rest", rateLimitKeySecret));
-  app.use("/mcp", rateLimitMiddleware(mcpLimiter, "mcp", rateLimitKeySecret));
+  app.use("/api/tools", rateLimitMiddleware(
+    apiLimiter,
+    apiGlobalLimiter,
+    "rest",
+    rateLimitKeySecret,
+    rateLimitClientIpSource,
+  ));
+  app.use("/mcp", rateLimitMiddleware(
+    mcpLimiter,
+    mcpGlobalLimiter,
+    "mcp",
+    rateLimitKeySecret,
+    rateLimitClientIpSource,
+  ));
   app.use(express.json({ limit: "32kb" }));
 
   app.get("/health", (_, response) => {
@@ -316,21 +339,59 @@ function retryAfter(windowStart: number, windowMs: number, now: number): number 
   return Math.max(1, Math.ceil((windowStart + windowMs - now) / 1_000));
 }
 
-function rateLimitMiddleware(limiter: FixedWindowLimiter, kind: "rest" | "mcp", keySecret: string) {
+function rateLimitMiddleware(
+  limiter: FixedWindowLimiter,
+  globalLimiter: FixedWindowLimiter,
+  kind: "rest" | "mcp",
+  keySecret: string,
+  clientIpSource: "express" | "render-cf-connecting-ip",
+) {
   return (request: Request, response: Response, next: NextFunction): void => {
-    const clientKey = createHmac("sha256", keySecret).update(request.ip ?? "unknown").digest("base64url");
-    const limit = limiter.consume(clientKey);
+    const clientIdentity = rateLimitClientIdentity(request, clientIpSource);
+    const clientKey = createHmac("sha256", keySecret).update(clientIdentity).digest("base64url");
+    const clientLimit = limiter.consume(clientKey);
+    if (!clientLimit.allowed) {
+      sendRateLimitDecision(response, kind, clientLimit);
+      return;
+    }
+    const globalLimit = globalLimiter.consume("global");
+    const limit = !globalLimit.allowed || globalLimit.remaining < clientLimit.remaining
+      ? globalLimit
+      : clientLimit;
     response.setHeader("X-RateLimit-Limit", String(limit.limit));
     response.setHeader("X-RateLimit-Remaining", String(limit.remaining));
     response.setHeader("X-RateLimit-Reset", String(limit.retryAfterSeconds));
     if (limit.allowed) return next();
-    response.setHeader("Retry-After", String(limit.retryAfterSeconds));
-    if (kind === "mcp") {
-      response.status(429).json({ jsonrpc: "2.0", id: null, error: { code: -32029, message: "Too many requests." } });
-      return;
-    }
-    response.status(429).json({ error: { code: "rate_limited", message: "Too many requests." } });
+    sendRateLimitDecision(response, kind, limit);
   };
+}
+
+function rateLimitClientIdentity(
+  request: Request,
+  source: "express" | "render-cf-connecting-ip",
+): string {
+  if (source === "express") return `express:${request.ip ?? "unknown"}`;
+  const header = request.headers["cf-connecting-ip"];
+  if (typeof header === "string" && header.length <= 45 && header === header.trim() && isIP(header) !== 0) {
+    return `render-cf:${header}`;
+  }
+  return "render-cf:unverified";
+}
+
+function sendRateLimitDecision(
+  response: Response,
+  kind: "rest" | "mcp",
+  limit: RateLimitDecision,
+): void {
+  response.setHeader("X-RateLimit-Limit", String(limit.limit));
+  response.setHeader("X-RateLimit-Remaining", String(limit.remaining));
+  response.setHeader("X-RateLimit-Reset", String(limit.retryAfterSeconds));
+  response.setHeader("Retry-After", String(limit.retryAfterSeconds));
+  if (kind === "mcp") {
+    response.status(429).json({ jsonrpc: "2.0", id: null, error: { code: -32029, message: "Too many requests." } });
+    return;
+  }
+  response.status(429).json({ error: { code: "rate_limited", message: "Too many requests." } });
 }
 
 function positiveSafeInteger(value: number, name: string): number {
