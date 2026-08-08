@@ -8,7 +8,7 @@ This file is the human-readable source of truth for the public listing. Portal-o
 - Category: Entertainment
 - Short description: Play turn-based games
 - Verified publisher: **REQUIRED BEFORE SUBMISSION**
-- Public MCP URL: **REQUIRED — stable HTTPS origin ending in `/mcp`**
+- Public MCP URL: https://turnplay-arena.onrender.com/mcp
 - Website: https://charlie2233.github.io/turnplay-arena/
 - Support: https://charlie2233.github.io/turnplay-arena/support.html
 - Privacy: https://charlie2233.github.io/turnplay-arena/privacy.html
@@ -65,5 +65,5 @@ Keep exactly three in the portal payload.
 - Three real screenshots meeting the exact portal dimensions above (prepared in `submission/screenshots/`).
 - Short demo recording showing production start/move, difficulty, Go-photo review, reset/end confirmation, and authoritative receipts.
 - Verified publisher identity and Apps Management write access.
-- Stable production MCP service with persistent storage and safe bounded logs.
+- Stable production MCP service at `https://turnplay-arena.onrender.com/mcp`: one paid Render Starter instance, a 1 GB persistent disk, 30-day inactive-game expiry, seven-day migration-backup expiry, and seven-day Render Hobby log retention. A create/move/service-restart/resume smoke passed against the same origin on August 8, 2026.
 - Domain verification, automated tool scan, hosted ChatGPT acceptance, availability selection, policy attestations, and final release notes.

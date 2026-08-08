@@ -442,7 +442,7 @@ Original prompt: also implement select difficuktuy
 - [x] Added a checked-in Playwright/Chromium gate: 9/9 real-browser tests cover six exact width/height layouts plus real mobile/touch emulation, picker containment/non-overlap, 64 Chess hit targets and an applied opening at every width, real Hard Tic-Tac-Toe player/GPT turns, End/cancel/Try again call ordering and reset epochs at 416×360, pointer-only no-board restore with exactly one intercepted state read, zero unsolicited creates, zero runtime errors, and CI execution against an isolated port/uniquely cleaned store.
 - [x] Made the default browser command artifact-safe: it never rebuilds `web/dist`, never binds port 8000, and runs with a uniquely cleaned temporary save. CI builds first in its own runner and runs the unit suites serially so the Chess timing check does not compete with other test files.
 - [x] Pinned patched Vitest, Ajv, and MCP SDK releases. `npm audit --omit=dev` reports zero production findings; SDK 1.30.0 resolves the transitive Hono advisory, and the server now explicitly matches the repository's Node 20.19 runtime floor required by the patched dependency graph.
-- [ ] Stable hosted ChatGPT acceptance remains a separate production-endpoint gate. The live Node process and Cloudflare tunnel were not stopped or restarted; the intended v21 `web/dist` artifact was rebuilt locally and may be read by that process on a later widget-resource request.
+- [ ] Stable hosted ChatGPT acceptance remains a separate gate. The paid Render endpoint, reviewed widget, public MCP handshake, spoof-resistant rate limiting, and restart persistence now pass, but a fresh mounted ChatGPT player/GPT turn against that stable endpoint is still required.
 
 ## Stable production acceptance harness
 
@@ -455,6 +455,7 @@ Original prompt: also implement select difficuktuy
 
 ### Remaining external gates
 
-- [ ] Owner approves and creates the paid single-instance Render service with its 1 GB `/data` disk, exact `PUBLIC_BASE_URL`, bounded host-log retention, and verified proxy topology.
+- [x] Owner approved and created the paid single-instance Render Starter service with its 1 GB `/data` disk and exact `PUBLIC_BASE_URL`. Render Hobby logs are retained for seven days; the provider-overwritten `CF-Connecting-IP` source and global backstop passed live spoof tests.
 - [ ] Run the documented seed phase against that stable HTTPS origin, restart or redeploy the same service without clearing the disk, and run the documented resume phase with the same mode-`0600` token and receipt files.
+- [x] Independently proved hosted persistence before the portal token was available: create Medium Chess, apply `e2e4` exactly once, restart the same Render service without clearing its disk, observe a changed boot identity, and reread version 1 with the same move.
 - [ ] Reconnect the stable `/mcp` URL in ChatGPT, refresh metadata to v21, and visibly complete a real player turn plus matching GPT turn on the mounted v21 board. A passing command-line harness or localhost simulation cannot prove this final UI gate.
