@@ -19,6 +19,8 @@ services:
         value: "604800000"
       - key: PUBLIC_BASE_URL
         sync: false
+      - key: TRUST_PROXY_HOPS
+        value: "1"
     disk:
       name: turnplay-game-data
       mountPath: /data
