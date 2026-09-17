@@ -63,8 +63,8 @@ describe("MCP game arena server", () => {
   });
 
   it("registers eight game tools and the widget resource", async () => {
-    expect(WIDGET_RESOURCE_URI).toBe("ui://gpt-game-arena/v21/widget.html");
-    expect(LEGACY_WIDGET_RESOURCE_URIS).toEqual(["ui://gpt-game-arena/v20/widget.html", "ui://gpt-game-arena/v19/widget.html", "ui://gpt-game-arena/v18/widget.html", "ui://gpt-game-arena/v17/widget.html", "ui://gpt-game-arena/v16/widget.html", "ui://gpt-game-arena/v15/widget.html", "ui://gpt-game-arena/v14/widget.html", "ui://gpt-game-arena/v13/widget.html", "ui://gpt-game-arena/v12/widget.html", "ui://gpt-game-arena/v11/widget.html"]);
+    expect(WIDGET_RESOURCE_URI).toBe("ui://gpt-game-arena/v22/widget.html");
+    expect(LEGACY_WIDGET_RESOURCE_URIS).toEqual(["ui://gpt-game-arena/v21/widget.html", "ui://gpt-game-arena/v20/widget.html", "ui://gpt-game-arena/v19/widget.html", "ui://gpt-game-arena/v18/widget.html", "ui://gpt-game-arena/v17/widget.html", "ui://gpt-game-arena/v16/widget.html", "ui://gpt-game-arena/v15/widget.html", "ui://gpt-game-arena/v14/widget.html", "ui://gpt-game-arena/v13/widget.html", "ui://gpt-game-arena/v12/widget.html", "ui://gpt-game-arena/v11/widget.html"]);
     expect(WIDGET_DESCRIPTION).toContain("Mini 8-Ball");
     expect(WIDGET_DESCRIPTION).toContain("Court Duel");
     expect(WIDGET_DESCRIPTION).toContain("chess");

@@ -8,14 +8,14 @@ import {
 
 const usage = `Turnplay Arena production acceptance
 
-Seed a real v21 game before restarting the provider:
+Seed a real v22 game before restarting the provider:
   npm run verify:production -- --phase seed --base-url https://turnplay-arena.onrender.com --challenge-token-file /private/openai-domain-token
 
 After restarting the same single provider instance with its disk attached:
   npm run verify:production -- --phase resume --base-url https://turnplay-arena.onrender.com --challenge-token-file /private/openai-domain-token
 
 Options:
-  --state-file PATH        Receipt path (default: .data/production-acceptance-v21.json)
+  --state-file PATH        Receipt path (default: .data/production-acceptance-v22.json)
   --challenge-token-file   Mode-0600 file containing the exact OpenAI portal token
   --require-challenge      Require route presence in a localhost simulation
   --allow-http-localhost   Allow HTTP only for localhost development checks

@@ -8,9 +8,9 @@ import { dirname, resolve } from "node:path";
 import { isIP } from "node:net";
 
 export const PRODUCTION_ACCEPTANCE_FORMAT_VERSION = 1;
-export const CURRENT_WIDGET_RESOURCE_URI = "ui://gpt-game-arena/v21/widget.html";
-export const CURRENT_WIDGET_RELEASE_MARKER = "turnplay-v21-20260807-3f4c9d2";
-export const CURRENT_WIDGET_BUNDLE_SHA256 = "298e927861ff9c48b77560c5b6acc3e581eca9f1bfa933c22165dd518746a781";
+export const CURRENT_WIDGET_RESOURCE_URI = "ui://gpt-game-arena/v22/widget.html";
+export const CURRENT_WIDGET_RELEASE_MARKER = "turnplay-v22-20260916-opponent";
+export const CURRENT_WIDGET_BUNDLE_SHA256 = "0990fe5182bce70c3159ff8bb92d4e7e84f2771c078b63776d4bfa902989dee6";
 export const EXPECTED_TOOL_NAMES = [
   "confirm_imported_go_position",
   "create_game",
@@ -166,7 +166,7 @@ export function parseProductionAcceptanceArgs(argv, cwd = process.cwd()) {
   const options = {
     phase: undefined,
     baseUrl: undefined,
-    stateFile: resolve(cwd, ".data", "production-acceptance-v21.json"),
+    stateFile: resolve(cwd, ".data", "production-acceptance-v22.json"),
     challengeTokenFile: undefined,
     requireChallenge: false,
     allowHttpLocalhost: false,
@@ -471,7 +471,7 @@ export function validateWidgetResource(result, origin, expectedBundleDigest = CU
   const frameDomains = content?._meta?.ui?.csp?.frameDomains;
   assert(frameDomains === undefined || (Array.isArray(frameDomains) && frameDomains.length === 0), "Widget frame CSP is broader than the current app requires.");
   const bundleDigest = createHash("sha256").update(content.text, "utf8").digest("hex");
-  assert(bundleDigest === expectedBundleDigest, "Current widget resource does not match the reviewed v21 bundle digest.");
+  assert(bundleDigest === expectedBundleDigest, "Current widget resource does not match the reviewed v22 bundle digest.");
   return content;
 }
 
@@ -538,7 +538,7 @@ async function verifyCommon(context, requireChallenge, expectedChallengeToken, e
   const listedResources = await mcpRequest(context, "resources/list", {});
   assert(Array.isArray(listedResources?.resources), "MCP resources/list did not return a resource array.");
   const currentResources = listedResources.resources.filter(resource => resource?.uri === CURRENT_WIDGET_RESOURCE_URI);
-  assert(currentResources.length === 1, "MCP resources/list must expose the current v21 widget exactly once.");
+  assert(currentResources.length === 1, "MCP resources/list must expose the current v22 widget exactly once.");
   assert(currentResources[0]?.mimeType?.toLowerCase() === "text/html;profile=mcp-app", "MCP resources/list advertises the wrong current widget MIME type.");
   const widget = await mcpRequest(context, "resources/read", { uri: CURRENT_WIDGET_RESOURCE_URI });
   validateWidgetResource(widget, context.origin, context.widgetBundleDigest);

@@ -174,7 +174,7 @@ test("Hard Tic-Tac-Toe as White keeps settings and a confirmed GPT opening after
   });
   expect(opened.game?.lastMove).toMatchObject({ actor: "gpt", notation: "B2" });
   await expect(page.locator(".history li")).toHaveCount(1);
-  await expect(page.locator(".history li")).toContainText("B2 · GPT");
+  await expect(page.locator(".history li")).toContainText("B2 · Opponent");
   const gameId = opened.game?.gameId;
   const resetEpoch = opened.game?.resetEpoch ?? 0;
   expect(gameId).toBeTruthy();
@@ -242,7 +242,7 @@ test("Hard Tic-Tac-Toe as White keeps settings and a confirmed GPT opening after
   });
   expect(retried.game?.lastMove).toMatchObject({ actor: "gpt", notation: "B2" });
   await expect(page.locator(".history li")).toHaveCount(1);
-  await expect(page.locator(".history li")).toContainText("B2 · GPT");
+  await expect(page.locator(".history li")).toContainText("B2 · Opponent");
   await expect(page.locator("#game-preset")).toHaveValue("chess");
   await expect(page.locator("#difficulty-preset")).toHaveValue("easy");
   await expect(page.locator("#side-preset")).toHaveValue("black");

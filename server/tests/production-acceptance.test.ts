@@ -345,7 +345,7 @@ describe("production acceptance harness", () => {
     expect(() => validateWidgetResource({ contents: [{ ...content, mimeType: "text/html" }] }, origin, digest)).toThrow("wrong MIME type");
     expect(() => validateWidgetResource({ contents: [{ ...content, _meta: { ui: { ...content._meta.ui, domain: "https://other.onrender.com" } } }] }, origin, digest)).toThrow("exact production origin");
     expect(() => validateWidgetResource({ contents: [{ ...content, text: content.text.replace(CURRENT_WIDGET_RELEASE_MARKER, "turnplay-v20-stale") }] }, origin, digest)).toThrow(CURRENT_WIDGET_RELEASE_MARKER);
-    expect(() => validateWidgetResource({ contents: [{ ...content, text: `${content.text} ` }] }, origin, digest)).toThrow("reviewed v21 bundle digest");
+    expect(() => validateWidgetResource({ contents: [{ ...content, text: `${content.text} ` }] }, origin, digest)).toThrow("reviewed v22 bundle digest");
   });
 
   it("requires challenge token files to be private and contain exactly one line", async () => {

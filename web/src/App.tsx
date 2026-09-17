@@ -266,19 +266,19 @@ export function App({ bridge: suppliedBridge, initialGame }: { bridge?: GameBrid
         }
         if (!reply) {
           recoveredFromState = true;
-          try { reply = await client.state(current.gameId); } catch { throw new Error("GPT move was not confirmed. Use Refresh to continue."); }
+          try { reply = await client.state(current.gameId); } catch { throw new Error("Opponent move was not confirmed. Use Refresh to continue."); }
         }
       } finally {
         if (pendingGptReceipt.current === pending) pendingGptReceipt.current = undefined;
       }
       if (version !== epoch.current) return;
-      if (!reply) throw new Error("GPT move was not confirmed. Use Refresh to continue.");
-      if (bridge.embedded && !(recoveredFromState ? isConfirmedGptRecovery(current, reply, move) : isConfirmedGptAdvance(current, reply, move))) throw new Error("GPT move was not confirmed. Use Refresh to continue.");
-      if (!bridge.embedded && (reply.gameId !== current.gameId || resetEpochOf(reply) !== resetEpochOf(current) || reply.stateVersion <= current.stateVersion)) throw new Error("The game service returned a non-advancing GPT state.");
+      if (!reply) throw new Error("Opponent move was not confirmed. Use Refresh to continue.");
+      if (bridge.embedded && !(recoveredFromState ? isConfirmedGptRecovery(current, reply, move) : isConfirmedGptAdvance(current, reply, move))) throw new Error("Opponent move was not confirmed. Use Refresh to continue.");
+      if (!bridge.embedded && (reply.gameId !== current.gameId || resetEpochOf(reply) !== resetEpochOf(current) || reply.stateVersion <= current.stateVersion)) throw new Error("The game service returned a non-advancing opponent state.");
       apply(reply, version);
       current = reply;
     }
-    if (current.status === "active" && current.turn !== current.playerColor) throw new Error("GPT turn limit reached.");
+    if (current.status === "active" && current.turn !== current.playerColor) throw new Error("Opponent turn limit reached.");
   }, [apply, bridge.embedded, client]);
   useEffect(() => {
     if (lifecycleTimer.current) { window.clearTimeout(lifecycleTimer.current); lifecycleTimer.current = undefined; }
@@ -563,7 +563,7 @@ export function App({ bridge: suppliedBridge, initialGame }: { bridge?: GameBrid
       <div className={`board-column board-${game.kind}${game.kind === "go" && game.initialPosition ? " imported-position" : ""}`}>
         {game.kind === "go" && game.initialPosition && <section className={`import-review${importReviewPending ? " pending" : " verified"}`} aria-label="Imported Go position review">
           <div><strong>Imported Go position</strong><span>{game.boardSize}×{game.boardSize} · {game.initialPosition.blackStones.length} Black · {game.initialPosition.whiteStones.length} White</span></div>
-          <div><span>You: {titleColor(game.playerColor)} · Next: {titleColor(game.turn)} ({game.turn === game.playerColor ? "you" : "GPT"})</span>{importReviewPending ? <button type="button" disabled={busy || confirmationOpen} onClick={confirmImportReview}>Looks right — continue</button> : <b>✓ Verified</b>}</div>
+          <div><span>You: {titleColor(game.playerColor)} · Next: {titleColor(game.turn)} ({game.turn === game.playerColor ? "you" : "Opponent"})</span>{importReviewPending ? <button type="button" disabled={busy || confirmationOpen} onClick={confirmImportReview}>Looks right — continue</button> : <b>✓ Verified</b>}</div>
           {importReviewPending && <small>Check the stones first. If one is wrong, tell GPT the correction before continuing.</small>}
         </section>}
         {game.kind === "chess" ? <ChessBoard game={game} selected={selected} onSquare={chessSquare} disabled={disabled}/> : game.kind === "go" ? <GoBoard game={game} onMove={humanMove} disabled={disabled}/> : game.kind === "tic-tac-toe" ? <TicTacToeBoard game={game} onMove={humanMove} disabled={disabled}/> : game.kind === "reversi" ? <ReversiBoard game={game} onMove={humanMove} disabled={disabled}/> : game.kind === "connect-four" ? <ConnectFourBoard game={game} onMove={humanMove} disabled={disabled}/> : game.kind === "pool" ? <PoolBoard game={game} onMove={humanMove} disabled={disabled}/> : <BasketballBoard game={game} onMove={humanMove} disabled={disabled}/>}
@@ -571,7 +571,7 @@ export function App({ bridge: suppliedBridge, initialGame }: { bridge?: GameBrid
         {game.kind === "go" && <p className="captures">Captures — Black: {game.captures.black}, White: {game.captures.white}</p>}
         {game.kind === "reversi" && <p className="captures">Disks — Black: {game.score.black}, White: {game.score.white}</p>}
         {game.kind === "pool" && <p className="captures">Black shoots solids · White shoots stripes · Clear your group, then pocket the 8</p>}
-        {game.kind === "basketball" && <p className="captures">Score — You: {game.score[game.playerColor]}, GPT: {game.score[game.playerColor === "black" ? "white" : "black"]}</p>}
+        {game.kind === "basketball" && <p className="captures">Score — You: {game.score[game.playerColor]}, Opponent: {game.score[game.playerColor === "black" ? "white" : "black"]}</p>}
         <p className="game-status" role="status">{gameStatusText(game, importReviewPending)}</p>
       </div>
     </section>}

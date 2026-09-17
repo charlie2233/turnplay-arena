@@ -20,8 +20,8 @@ import {
   type ToolCallOutcome,
 } from "./telemetry.js";
 
-export const WIDGET_RESOURCE_URI = "ui://gpt-game-arena/v21/widget.html";
-export const LEGACY_WIDGET_RESOURCE_URIS = ["ui://gpt-game-arena/v20/widget.html", "ui://gpt-game-arena/v19/widget.html", "ui://gpt-game-arena/v18/widget.html", "ui://gpt-game-arena/v17/widget.html", "ui://gpt-game-arena/v16/widget.html", "ui://gpt-game-arena/v15/widget.html", "ui://gpt-game-arena/v14/widget.html", "ui://gpt-game-arena/v13/widget.html", "ui://gpt-game-arena/v12/widget.html", "ui://gpt-game-arena/v11/widget.html"] as const;
+export const WIDGET_RESOURCE_URI = "ui://gpt-game-arena/v22/widget.html";
+export const LEGACY_WIDGET_RESOURCE_URIS = ["ui://gpt-game-arena/v21/widget.html", "ui://gpt-game-arena/v20/widget.html", "ui://gpt-game-arena/v19/widget.html", "ui://gpt-game-arena/v18/widget.html", "ui://gpt-game-arena/v17/widget.html", "ui://gpt-game-arena/v16/widget.html", "ui://gpt-game-arena/v15/widget.html", "ui://gpt-game-arena/v14/widget.html", "ui://gpt-game-arena/v13/widget.html", "ui://gpt-game-arena/v12/widget.html", "ui://gpt-game-arena/v11/widget.html"] as const;
 export const WIDGET_DESCRIPTION = "An interactive Mini 8-Ball, Court Duel basketball, chess, Reversi, Tic-Tac-Toe, Connect Four, or 9x9, 13x13, or 19x19 Go game, including Go positions transcribed from an attached photo.";
 export type WidgetLoader = () => string | undefined | Promise<string | undefined>;
 

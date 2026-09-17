@@ -486,3 +486,25 @@ Original prompt: also implement select difficuktuy
 - [ ] A fresh mounted ChatGPT player move plus matching automatic opponent move against the stable production endpoint.
 - [ ] The final production demo recording and portal asset confirmation.
 - [ ] Portal submission, review, and public ChatGPT listing approval.
+
+## Automatic-opponent labels and v22 artifacts — 2026-09-16
+
+### Implemented
+
+- [x] Changed automatic local-engine role, history, score, energy, shot-result, turn, and error labels to `Opponent`, including `Opponent choosing a move…` while a move is pending. Preserved the `gpt` protocol actor, helper names, exact move/receipt behavior, and the real GPT photo-transcription correction instruction.
+- [x] Updated existing affected UI/browser assertions without adding prose-only tests, dependencies, schemas, or gameplay changes.
+- [x] Published the local build as immutable widget v22 with marker `turnplay-v22-20260916-opponent`; retained v21 through v11 resource aliases and aligned current acceptance scripts, declarations, defaults, errors, and README.
+- [x] Built the web workspace before calculating SHA-256 `0990fe5182bce70c3159ff8bb92d4e7e84f2771c078b63776d4bfa902989dee6`, then updated both bundle pins and passed the unchanged validator.
+
+### Verification and capture evidence
+
+- [x] `npm run typecheck`, `npm run test:ci`, `npm run build`, and `npm run test:browser` pass: 264 server tests, 221 web tests, four-page static-site validation, and nine real-browser checks. `git diff --check` passes.
+- [x] `node scripts/capture-submission-screenshots.mjs` regenerates all three existing PNGs from the actual built localhost preview with an isolated temporary persistent game store, then closes the browser/server and removes that temporary store. The capture restores only strict v2 `activeGameId` plus draft settings; each reload performs exactly one authoritative state read and no mutations.
+- [x] Visually reviewed `01-medium-chess.png` (706×588, Medium, player White), `02-hard-go-9.png` (706×701, Hard, player Black), and `03-imported-go-19.png` (706×824, Hard, player White, Black next, review pending). All board and action controls are present with correct Opponent labels and no runtime errors. The imported capture retains ten setup stones, no legal moves, and disabled board points before review.
+- [x] Captures are direct full-page Chromium screenshots, not edited images: Chess/9×9 Go use a 706×560 viewport at device scale 1; imported 19×19 Go uses a 941×760 viewport at device scale 0.75 for the portal's 706-pixel output width. No app CSS was changed for these captures.
+- [x] The skill-provided browser-game client produced and visually verified a clean 1280×720 Chess screenshot and matching `render_game_to_text` state, with no error artifact. Its missing external Playwright import was resolved to the repository's existing package at runtime; no dependency changes were made.
+
+### Remaining release gates
+
+- [ ] Independent final specification/code-quality review, merge/push, CI, and stable Render redeployment of v22 remain with the release coordinator.
+- [ ] Publisher identity, OpenAI domain verification/tool scan, challenge-bound production seed/resume, mounted ChatGPT gameplay, demo recording, portal submission, and public listing approval remain external gates; localhost checks and prepared files do not prove those outcomes.

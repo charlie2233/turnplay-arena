@@ -302,7 +302,7 @@ describe("App", () => {
     const user = userEvent.setup();
 
     render(<StrictMode><App bridge={bridge} initialGame={importedGo("white", "black")}/></StrictMode>);
-    expect(screen.getByText("You: White · Next: Black (GPT)")).toBeVisible();
+    expect(screen.getByText("You: White · Next: Black (Opponent)")).toBeVisible();
     expect(sendFollowUpMessage).not.toHaveBeenCalled();
     await waitFor(() => expect(target.postMessage).toHaveBeenCalledWith(expect.objectContaining({ id: 1, method: "ui/initialize" }), "*"));
     window.dispatchEvent(new MessageEvent("message", { source: target, data: { jsonrpc: "2.0", id: 1, result: validInit() } }));
@@ -335,7 +335,7 @@ describe("App", () => {
     render(<App/>);
 
     expect(screen.getByRole("region", { name: "Imported Go position review" })).toBeVisible();
-    expect(screen.getByText("You: Black · Next: White (GPT)")).toBeVisible();
+    expect(screen.getByText("You: Black · Next: White (Opponent)")).toBeVisible();
     expect(screen.getByRole("button", { name: "Empty A9" })).toBeDisabled();
   });
   it("requires a fresh authoritative review after resetting an imported game", async () => {
@@ -723,7 +723,7 @@ describe("App", () => {
     expect(calls("play_game_move")[1]).toEqual(expect.objectContaining({ params: { name: "play_game_move", arguments: { gameId: after.gameId, actor: "gpt", move: gptMove, expectedVersion: after.stateVersion, expectedResetEpoch: 3 } } }));
     expect(calls("get_game_state")).toHaveLength(0);
     expect(postMessage).not.toHaveBeenCalledWith(expect.objectContaining({ method: "ui/message" }), "*");
-    expect(screen.getByText("GPT thinking…")).toBeVisible();
+    expect(screen.getByText("Opponent choosing a move…")).toBeVisible();
     expect(screen.getByRole("button", { name: /white pawn on e2/i })).toBeDisabled();
 
     await respond(3, { structuredContent: newer });
@@ -789,7 +789,7 @@ describe("App", () => {
     await waitFor(() => expect(calls("get_game_state")).toHaveLength(1));
     await respond(4, { structuredContent: malformed });
 
-    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("GPT move was not confirmed. Use Refresh to continue."));
+    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("Opponent move was not confirmed. Use Refresh to continue."));
     expect(screen.getByText("Black to move.")).toBeVisible();
     expect(screen.queryByText("Malformed GPT state.")).not.toBeInTheDocument();
     expect(calls("play_game_move")).toHaveLength(2);
@@ -900,7 +900,7 @@ describe("App", () => {
     await waitFor(() => expect(calls("get_game_state")).toHaveLength(1));
     await respond(4, { structuredContent: corrupt });
 
-    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("GPT move was not confirmed. Use Refresh to continue."));
+    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("Opponent move was not confirmed. Use Refresh to continue."));
     expect(screen.getByText("Black to move.")).toBeVisible();
     expect(screen.queryByText("Corrupt reset read.")).not.toBeInTheDocument();
     expect(calls("play_game_move")).toHaveLength(2);
@@ -965,7 +965,7 @@ describe("App", () => {
     await waitFor(() => expect(calls("get_game_state")).toHaveLength(1));
     await respond(4, { structuredContent: mismatched });
 
-    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("GPT move was not confirmed. Use Refresh to continue."));
+    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("Opponent move was not confirmed. Use Refresh to continue."));
     expect(screen.getByText("Black to move.")).toBeVisible();
     expect(screen.queryByText("Wrong GPT receipt.")).not.toBeInTheDocument();
     expect(calls("play_game_move")).toHaveLength(2);
@@ -1088,7 +1088,7 @@ describe("App", () => {
     await Promise.resolve();
     expect(screen.getByText("Black to move.")).toBeVisible();
     expect(screen.queryByText("Corrupt reset notification.")).not.toBeInTheDocument();
-    expect(screen.getByText("GPT thinking…")).toBeVisible();
+    expect(screen.getByText("Opponent choosing a move…")).toBeVisible();
 
     await respond(3, { structuredContent: expected });
     await waitFor(() => expect(screen.getByText("Confirmed direct move.")).toBeVisible());
@@ -1502,7 +1502,7 @@ describe("App", () => {
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     expect(JSON.parse((vi.mocked(fetch).mock.calls[0][1] as RequestInit).body as string)).toEqual({ gameId: "court", actor: "player", move: "drive", expectedVersion: 0, expectedResetEpoch: 0 });
     expect(JSON.parse((vi.mocked(fetch).mock.calls[1][1] as RequestInit).body as string)).toEqual({ gameId: "court", actor: "gpt", move: gptMove, expectedVersion: 1, expectedResetEpoch: 0 });
-    expect(screen.getByText(new RegExp(`GPT made ${profile.points}`))).toBeVisible();
+    expect(screen.getByText(new RegExp(`Opponent made ${profile.points}`))).toBeVisible();
     const text = JSON.parse(window.render_game_to_text!());
     expect(text.game).toMatchObject({ kind: "basketball", stateVersion: 2, round: 2, score: afterGpt.score, energy: afterGpt.energy });
   });
@@ -1552,9 +1552,9 @@ describe("App", () => {
     const skipped: ReversiSnapshot = { ...reversi(), moveHistory: [{ actor: "gpt", color: "white", notation: "C4", ply: 8 }, { actor: "gpt", color: "white", notation: "A3", ply: 9 }], lastMove: { actor: "gpt", color: "white", notation: "A3", ply: 9 }, stateVersion: 9 };
     render(<App initialGame={skipped}/>);
     expect(screen.getByText("8.")).toBeVisible();
-    expect(screen.getByText("C4 · GPT (White)")).toBeVisible();
+    expect(screen.getByText("C4 · Opponent (White)")).toBeVisible();
     expect(screen.getByText("9.")).toBeVisible();
-    expect(screen.getByText("A3 · GPT (White)")).toBeVisible();
+    expect(screen.getByText("A3 · Opponent (White)")).toBeVisible();
     expect(screen.queryByText("4…")).not.toBeInTheDocument();
   });
   it("keeps standalone Reversi busy through a forced skipped-player GPT turn", async () => {
@@ -1739,7 +1739,7 @@ describe("App", () => {
     await waitFor(() => expect(target.postMessage).toHaveBeenCalledWith(expect.objectContaining({ id: 2, method: "tools/call", params: { name: "play_game_move", arguments: expect.objectContaining({ actor: "player" }) } }), "*"));
     await reply(2, { structuredContent: after });
     await waitFor(() => expect(target.postMessage).toHaveBeenCalledWith(expect.objectContaining({ id: 3, method: "tools/call", params: { name: "play_game_move", arguments: expect.objectContaining({ actor: "gpt" }) } }), "*"));
-    expect(screen.getByText("GPT thinking…")).toBeVisible();
+    expect(screen.getByText("Opponent choosing a move…")).toBeVisible();
 
     const resetTrigger = screen.getByRole("button", { name: /reset/i });
     expect(resetTrigger).toBeEnabled();
@@ -1750,7 +1750,7 @@ describe("App", () => {
     await reply(4, { structuredContent: reset });
 
     await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("Choose a piece to begin."));
-    expect(screen.queryByText("GPT move not confirmed")).not.toBeInTheDocument();
+    expect(screen.queryByText("Opponent move not confirmed")).not.toBeInTheDocument();
     bridge.dispose();
   });
   it("keeps End game interruptible while GPT is thinking and ignores its late direct receipt after confirmation", async () => {
@@ -1777,7 +1777,7 @@ describe("App", () => {
     await Promise.resolve();
     expect(screen.getByText("Black to move.")).toBeVisible();
     expect(screen.queryByText("Game ended.")).not.toBeInTheDocument();
-    expect(screen.getByText("GPT thinking…")).toBeVisible();
+    expect(screen.getByText("Opponent choosing a move…")).toBeVisible();
 
     fireEvent.click(screen.getByRole("button", { name: "End game" }));
     const dialog = screen.getByRole("alertdialog", { name: "End this game?" });
@@ -1917,13 +1917,13 @@ describe("App", () => {
     await vi.advanceTimersByTimeAsync(0);
 
     expect(screen.queryByText("Game ended.")).not.toBeInTheDocument();
-    expect(screen.getByText("GPT thinking…")).toBeVisible();
+    expect(screen.getByText("Opponent choosing a move…")).toBeVisible();
     expect(postMessage.mock.calls.filter(([request]) => (request as { params?: { name?: string } }).params?.name === "get_game_state")).toHaveLength(1);
     await reply(4, { structuredContent: ended });
 
     expect(screen.getByRole("status")).toHaveTextContent("Game ended.");
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-    expect(screen.queryByText("GPT move not confirmed")).not.toBeInTheDocument();
+    expect(screen.queryByText("Opponent move not confirmed")).not.toBeInTheDocument();
     bridge.dispose();
     await vi.advanceTimersByTimeAsync(0);
   });

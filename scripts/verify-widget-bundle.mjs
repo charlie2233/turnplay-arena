@@ -21,9 +21,9 @@ try {
 if (html !== undefined) {
   const digest = createHash("sha256").update(html, "utf8").digest("hex");
   if (!html.includes(CURRENT_WIDGET_RELEASE_MARKER) || digest !== CURRENT_WIDGET_BUNDLE_SHA256) {
-    console.error("Widget bundle verification failed: the v21 release marker or reviewed SHA-256 digest changed. Bump the immutable widget resource and review the new bundle before updating the pin.");
+    console.error("Widget bundle verification failed: the v22 release marker or reviewed SHA-256 digest changed. Bump the immutable widget resource and review the new bundle before updating the pin.");
     process.exitCode = 1;
   } else {
-    console.log(`Verified reviewed v21 widget bundle (${digest.slice(0, 12)}…).`);
+    console.log(`Verified reviewed v22 widget bundle (${digest.slice(0, 12)}…).`);
   }
 }

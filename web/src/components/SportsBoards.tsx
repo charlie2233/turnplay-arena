@@ -106,7 +106,7 @@ export function BasketballBoard({ game, onMove, disabled }: { game: BasketballSn
     <div className="court-score" aria-label="Court Duel score">
       <span>YOU <b>{game.score[game.playerColor]}</b></span>
       <strong>{game.phase === "regulation" ? `ROUND ${game.round} / 5` : `OVERTIME ${game.round - 5} / 3`}</strong>
-      <span>GPT <b>{game.score[game.playerColor === "black" ? "white" : "black"]}</b></span>
+      <span>Opponent <b>{game.score[game.playerColor === "black" ? "white" : "black"]}</b></span>
     </div>
     <div className="half-court">
       <span className="court-hoop" aria-hidden="true">◉</span>
@@ -126,8 +126,8 @@ export function BasketballBoard({ game, onMove, disabled }: { game: BasketballSn
     </div>
     <div className="court-meta">
       <span>Your energy <b>{game.energy[game.playerColor]} / 4</b></span>
-      <strong aria-live="polite">{lastShot ? `${lastShot.actor === "player" ? "You" : "GPT"} ${lastShot.made ? `made ${lastShot.points}` : "missed"} (${lastShot.move})` : "Pick your first shot"}</strong>
-      <span>GPT energy <b>{game.energy[game.playerColor === "black" ? "white" : "black"]} / 4</b></span>
+      <strong aria-live="polite">{lastShot ? `${lastShot.actor === "player" ? "You" : "Opponent"} ${lastShot.made ? `made ${lastShot.points}` : "missed"} (${lastShot.move})` : "Pick your first shot"}</strong>
+      <span>Opponent energy <b>{game.energy[game.playerColor === "black" ? "white" : "black"]} / 4</b></span>
     </div>
   </section>;
 }

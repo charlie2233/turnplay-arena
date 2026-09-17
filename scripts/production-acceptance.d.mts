@@ -1,7 +1,7 @@
 export const PRODUCTION_ACCEPTANCE_FORMAT_VERSION: 1;
-export const CURRENT_WIDGET_RESOURCE_URI: "ui://gpt-game-arena/v21/widget.html";
-export const CURRENT_WIDGET_RELEASE_MARKER: "turnplay-v21-20260807-3f4c9d2";
-export const CURRENT_WIDGET_BUNDLE_SHA256: "298e927861ff9c48b77560c5b6acc3e581eca9f1bfa933c22165dd518746a781";
+export const CURRENT_WIDGET_RESOURCE_URI: "ui://gpt-game-arena/v22/widget.html";
+export const CURRENT_WIDGET_RELEASE_MARKER: "turnplay-v22-20260916-opponent";
+export const CURRENT_WIDGET_BUNDLE_SHA256: "0990fe5182bce70c3159ff8bb92d4e7e84f2771c078b63776d4bfa902989dee6";
 export const EXPECTED_TOOL_NAMES: string[];
 
 export class ProductionAcceptanceError extends Error {}
