@@ -459,3 +459,30 @@ Original prompt: also implement select difficuktuy
 - [ ] Run the documented seed phase against that stable HTTPS origin, restart or redeploy the same service without clearing the disk, and run the documented resume phase with the same mode-`0600` token and receipt files.
 - [x] Independently proved hosted persistence before the portal token was available: create Medium Chess, apply `e2e4` exactly once, restart the same Render service without clearing its disk, observe a changed boot identity, and reread version 1 with the same move.
 - [ ] Reconnect the stable `/mcp` URL in ChatGPT, refresh metadata to v21, and visibly complete a real player turn plus matching GPT turn on the mounted v21 board. A passing command-line harness or localhost simulation cannot prove this final UI gate.
+
+## Release-readiness refresh — 2026-09-16
+
+### Implemented
+
+- [x] Updated only the affected transitive lockfile entries: `fast-uri` 3.1.5 → 3.1.8, `hono` 4.12.34 → 4.13.8, and `qs` 6.15.3 → 6.16.0. The direct MCP SDK stays at 1.30.0, and widget dependencies are unchanged.
+- [x] Corrected README, homepage, and demo instructions to describe the shared local difficulty-aware automatic opponent, versioned host-bridge submissions, and server confirmation. Removed claims that each widget tap triggers a new ChatGPT reasoning turn, candidate comparison, follow-up message, or polling loop.
+- [x] Linked the live stable standalone preview and distinguished approved Render hosting from the still-unverified hosted ChatGPT play check and public listing approval.
+- [x] Clarified that `get_game_state` and `render_game` perform bounded reads of existing sessions in the app's private game store. Preserved all eight tool annotations, the submission schema, five positive cases, and three negative cases.
+
+### Verification
+
+- [x] Clean `npm ci` succeeds on Node 22.22.0/npm 10.9.4; `npm audit --omit=dev` reports zero known production vulnerabilities.
+- [x] `npm run typecheck` passes for the server, web widget, and browser tests.
+- [x] `npm run test:ci` passes all 264 server tests and 221 web tests, plus the four-page static-site, local-link, policy, branding, and reviewer-case validation.
+- [x] `npm run build` passes both production builds and the unchanged reviewed v21 widget digest check (`298e927861ff…`).
+- [x] `npm run test:browser` passes all nine real-browser checks; `git diff --check` passes.
+- [x] Structural comparison confirms that the lockfile changes only the three named packages and the submission JSON changes only the two read-tool open-world justifications.
+- [ ] Development-only audit follow-up: full `npm audit` reports two moderate entries for Vitest and `@vitest/mocker` under GHSA-82fw-gwwq-j7x9. A test-runner major-version migration is outside this narrow production dependency patch.
+
+### External gates still unverified
+
+- [ ] Final verified publisher/legal identity and remaining policy/contact/retention details. The portal requires verified developer identity before creating or uploading a plugin; no portal draft creation is claimed here.
+- [ ] OpenAI domain verification, the live tool scan, and the challenge-bound production seed/resume acceptance run.
+- [ ] A fresh mounted ChatGPT player move plus matching automatic opponent move against the stable production endpoint.
+- [ ] The final production demo recording and portal asset confirmation.
+- [ ] Portal submission, review, and public ChatGPT listing approval.

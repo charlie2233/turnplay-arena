@@ -52,7 +52,7 @@
       },
       "justifications": {
         "read_only_justification": "Returns the authoritative game snapshot without modifying the session.",
-        "open_world_justification": "Does not write to public or third-party systems.",
+        "open_world_justification": "Reads only the requested existing game session from the app's bounded private game store; it does not fetch arbitrary external resources or access third-party systems.",
         "destructive_justification": "Does not delete, overwrite, or irreversibly change game progress."
       }
     },
@@ -100,7 +100,7 @@
       },
       "justifications": {
         "read_only_justification": "Returns the authoritative game snapshot and widget template without changing game state.",
-        "open_world_justification": "Does not write to public or third-party systems.",
+        "open_world_justification": "Reads only the requested existing game session from the app's bounded private game store and returns the app's fixed widget template; it does not fetch arbitrary external resources or access third-party systems.",
         "destructive_justification": "Only displays existing game data and does not erase or overwrite progress."
       }
     }

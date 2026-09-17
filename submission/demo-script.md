@@ -13,7 +13,7 @@ Target a concise three-to-five-minute recording against the final stable product
 ## Recording sequence
 
 1. **Discovery and settings** — Start a Medium Chess game as White. Show the compact board, the game selector, and all three difficulty choices.
-2. **Authoritative move** — Play `e2e4`. Let ChatGPT choose its response. Show that the board does not jump away while it thinks and that the narrated move matches the board history only after a move-confirmed receipt.
+2. **Authoritative move** — Play `e2e4`. Explain that the widget's local difficulty-aware engine chooses the automatic opponent reply and submits it through the ChatGPT host tool bridge; it does not request a new model reasoning turn for the tap. Show the stable board layout and the matching saved move/history after the server response with its `MOVE_CONFIRMED` receipt.
 3. **Reset confirmation** — Select Reset, cancel once, then confirm. Show preserved Chess/White/Medium settings, an empty board history, and a fresh version.
 4. **Go image review** — Attach the prepared image and ask to continue the position with explicit color, next turn, and Hard difficulty. Show the transcribed board and review card before any move is legal. Confirm the review, then play one legal turn.
 5. **End confirmation** — Select End Game, show the warning, confirm, and show the frozen board with Reset/Refresh still available.
