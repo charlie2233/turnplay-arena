@@ -508,3 +508,20 @@ Original prompt: also implement select difficuktuy
 
 - [ ] Independent final specification/code-quality review, merge/push, CI, and stable Render redeployment of v22 remain with the release coordinator.
 - [ ] Publisher identity, OpenAI domain verification/tool scan, challenge-bound production seed/resume, mounted ChatGPT gameplay, demo recording, portal submission, and public listing approval remain external gates; localhost checks and prepared files do not prove those outcomes.
+
+## Publication dependency refresh — 2026-10-05
+
+### Current evidence and scoped change
+
+- [x] Fresh GitHub queries confirm `main` is `7c7e55a9a8ae5c48b4bee38e3d4ca1a98dcb6100`. Its [CI run](https://github.com/charlie2233/turnplay-arena/actions/runs/35173800901) and [website publish run](https://github.com/charlie2233/turnplay-arena/actions/runs/35173800931) passed on September 17 UTC. Existing CI logs confirm 264 server tests, 221 web tests, nine browser checks, both builds, and the production-container restart/persistence smoke; these are historical results for that revision, not a fresh full-suite run.
+- [x] A current production dependency audit found newly reported `ip-address` advisories and the unpatched `braces` stack-exhaustion advisory through the Vite build plugin. The earlier zero-vulnerability result remains dated September evidence.
+- [x] Updated only the compatible transitive `ip-address` version from 10.4.0 to 10.7.3. Moved unchanged `vite`, `@vitejs/plugin-react`, and `vite-plugin-singlefile` versions to web development dependencies. Docker already installs all dependencies in its build stage and omits development dependencies in its runtime stage, which serves the prebuilt widget directly.
+- [x] Structural lockfile comparison confirms one package version change; all other package-entry changes are development classification flags, plus the matching web workspace manifest metadata. No game code, eight-tool contract, widget source, v22 identifier, bundle pin, or legal declaration changed.
+
+### Bounded local validation and remaining gates
+
+- [x] Clean isolated `npm ci --ignore-scripts`, `npm run typecheck`, `npm run test:site`, and `git diff --check` pass. Fresh `npm audit --omit=dev --package-lock-only --ignore-scripts` reports zero known production vulnerabilities.
+- [x] A separate clean `npm ci --omit=dev --ignore-scripts` install contains `ip-address` 10.7.3 and excludes Vite, both build plugins, `braces`, and `micromatch`.
+- [ ] Full dependency auditing still reports three high entries from the build-only `braces` chain and two moderate Vitest entries. No patched braces version is published at this check; the suggested plugin downgrade is not applied. Keep build configuration trusted while tracking upstream fixes.
+- [ ] The existing cloud CI must validate this new dependency revision, including the exact reviewed v22 widget digest, unit/browser regressions, and the production-container restart smoke before merge. Heavy local build/browser work was deferred to that existing workflow.
+- [ ] Publisher verification, final publisher/contact/support-retention/legal declarations, domain verification/tool scan, hosted ChatGPT acceptance, demo recording, submission, and public listing approval still require their own current evidence.
